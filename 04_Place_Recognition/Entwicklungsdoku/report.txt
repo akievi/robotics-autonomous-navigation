@@ -1,0 +1,25 @@
+Wandmodell: 8 Segmente aus ../config/map_config.yaml
+Trainingsorte: ['P2', 'P4', 'P6', 'P9']
+Lidar-Sigma (aus map_config.yaml, mcl.lidar_sigma): 0.01 m
+Monte-Carlo-Testfahrten pro Ort: 200 (zufaellige Orientierung)
+
+ NO_BINS  Genauigkeit   Dk korrekt(max)   Dk falsch(min)  Trennmarge   Winkelfehler mean/max
+      36       100.0%           68.0000          42.0000    -26.0000       3.81/9.92   deg
+      72       100.0%           93.0000         160.0000     67.0000       1.68/4.94   deg
+     120       100.0%          180.0000         415.0000    235.0000       1.21/3.00   deg
+     180       100.0%          203.0000         919.0000    716.0000       0.69/2.00   deg
+     360       100.0%          589.0000        3918.0000   3329.0000       0.34/1.00   deg
+
+Empfehlung (groesste Trennmarge zwischen richtigem und naechstbestem falschem Match):
+  NO_BINS       = 360
+  Dk_threshold ~= 2253.5000  (Mittelwert aus groesstem korrektem Dk=589.0000 und kleinstem falschem Dk=3918.0000)
+  Genauigkeit bei diesem NO_BINS: 100.0%
+  Winkelfehler bei diesem NO_BINS: mean=0.34 deg, max=1.00 deg
+
+ACHTUNG: Diese Werte basieren auf dem synthetischen Wandmodell + gaussschem Rauschen
+(lidar_sigma aus map_config.yaml). Reale Messungen (Mehrfachreflexionen, dynamische
+Objekte im Sichtfeld, Montageabweichungen) koennen abweichen. Vor Uebernahme dieser
+Werte in map_config.yaml unbedingt mit echten Lidar-Scans an P2/P4/P6/P9 pruefen
+(siehe README.md, "Offene Punkte fuer Hardwaretest").
+
+Synthetische Trainingssignaturen (NO_BINS=360) gespeichert in: signatures_synthetic/
