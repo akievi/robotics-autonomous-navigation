@@ -1,0 +1,89 @@
+# Koordinatenursprung: Startpose P1 = (0,0,0)
+# x = vorwaerts, y = links, Winkel in Grad (positiv = links)
+
+robot:
+  lidar_offset_x: -0.03   # Lidar 3cm hinter Radmittelpunkt
+  lidar_offset_y:  0.005  # Lidar 0.5cm links von Radmittelpunkt
+  wheel_diameter:  0.068  # m
+  axle_diameter:   0.206  # m (Radabstand)
+
+mcl:
+  n_particles: 800
+  noise_trans: 0.0096      # σ_x empirisch: 0.96%/m (8x 2m Messung)
+  noise_lat:   0.0217      # σ_y empirisch: 2.17%/m (seitliche Streuung)
+  noise_rot:   0.05        # Winkelrauschen (geschätzt)
+  bias_lat:    0.0181      # Linksdrift: +1.81cm/m (empirisch)
+  lidar_sigma: 0.01        # m, Standardabweichung Lidar-Messung
+  imu_sigma_deg: 15.0      # deg, IMU-Yaw Unsicherheit (gross, nur Richtungsinfo)
+  likelihood_floor: 0.01   # Floor verhindert Partikel-Kollaps
+  n_rays: 36               # Anzahl gleichverteilter Strahlen fuer Update
+  update_distance: 0.15    # MCL-Update alle 15cm oder an jedem Stopp
+
+navigation:
+  goal_tolerance_full: 0.03   # m, volle Punktzahl
+  goal_tolerance_half: 0.08   # m, halbe Punktzahl
+  segment_length: 0.30        # m, Fahrsegment zwischen MCL-Updates
+  max_correction_attempts: 3
+  y_correction_threshold: 0.02   # ab 2cm y-Abweichung korrigieren (MCL-basiert)
+  y_correction_gain_deg: 5.0     # max 5 Grad Korrektur pro Schwellwert
+  wall_target_dist: 0.26         # Sollabstand linke Wand
+  wall_angle_gain: 15.0          # Grad pro Meter Fehler (P1->P2)
+  wp3_wall_angle_gain: 30.0     # stärkere Wandkorrektur P2->P4 West: 2cm→0.6°, 5cm→1.5°
+  front_stop_wp2: 0.40           # Frontwand-Zielabstand bei P2 (vordere Wand bei x=3.0m)
+  wall_follow_segments: [2]      # Nur auf P1->P2 Wandfolge aktiv
+  wp3_nav_segments: [3]          # Waypoints mit WP3-Spezialnavigation
+  wp3_south_stop_dist: 0.40      # Frontstopp Phase 1 (untere_wand, P3 ist 0.32m davon)
+  wp3_west_stop_dist: 0.60       # Frontstopp Phase 2 (linke_abschlusswand bei x=-0.14)
+  wp3_wall_target_dist: 0.36     # Sollabstand zur untere_wand (y=-1.28) in Phase West (+4cm: stärkere Wegkorrektur nach 90°-Turn)
+  wp4_nav_segments: [4]          # Waypoints mit WP4-Navigation (direkt West, dann 90° rechts)
+  wp4_west_stop_dist: 0.25       # Frontstopp P3->P4 (0.60 - 0.35 = 0.25m)
+  front_stop_wp5: 0.60       # Frontstopp P4->P5
+  wp6_nav_segments: [6]      # P5->P6: 90° links + R: mit Lidar-Frontstopp
+  front_stop_wp6: 1.590      # Frontstopp P5->P6: 1.555+3.5cm früher
+  wp7_nav_segments: [7]      # P6->P7: 90° links Süd, Frontstopp, 90° rechts West, 15cm
+  wp7_north_wall_target_dist: 0.50  # Sollabstand Nordwand (y=0.27) nach Linksdrehung: P6.y=-0.23 → 0.23+0.27=0.50m
+  wp7_south_stop_dist: 0.32  # Frontstopp Südwand: 0.32m → Roboterzentrum bei y≈-0.99, 2cm früher als 0.30m
+  wp7_south_wall_target_dist: 0.27  # Sollabstand Südwand nach Rechtsdrehung (links vom Auto)
+  wp7_rear_stop_dist: 0.34   # Stopp Westfahrt: trenner_unten bei x=1.62, P7 bei x=1.24 → 0.38m, Puffer 4cm
+  wp8_nav_segments: [8]      # P7->P8: Westfahrt, Südwand links, Frontstopp
+  front_stop_wp8: 0.35       # Frontstopp P7->P8: 0.30+5cm=0.35m → stoppt 5cm früher
+  wp8_south_wall_target_dist: 0.27
+  wp8_segment_length: 0.12   # kurze Segmente für häufige Korrekturen
+  wp9_nav_segments: [9]      # P8->P9: 180°-Drehung, dann Ostfahrt, Südwand links, Rückwandstopp
+  wp9_rear_stop_dist: 0.77   # Rückwand linke_abschlusswand: 0.69+8cm=0.77m → fährt 8cm weiter nach Osten
+  wp9_south_wall_target_dist: 0.27
+  wp9_segment_length: 0.08   # kleinere Segmente für häufigere Korrektur auf kurzer Strecke
+  wp10_nav_segments: [10]    # P9->P10: 90°-Links, dann Nordfahrt (+y), Frontstopp obere_wand
+  front_stop_wp10: 0.68      # P10 S=61cm gemessen + 7cm Puffer (0.63+5cm=0.68m → stoppt 5cm früher)
+  wp11_nav_segments: [11]    # P10->P11: 90°-Links, dann Ostfahrt (-x), Frontstopp linke_abschlusswand
+  front_stop_wp11: 0.215     # P11 O=17cm + 2cm + 2.5cm = 0.215m → früher stoppen
+  wp11_south_wall_target_dist: 0.92  # untere_wand (y=-1.28) bei P10/P11 (y=-0.36): 1.28-0.36=0.92m
+  wp6_segment_length: 0.12   # kurze Segmente P5->P6: 0.46m Strecke → Stopp bei ~0.48m
+  max_waypoint_index: 10    # Bis zu welchem Waypoint fahren (10=bis P11)
+  imu_east_ref_deg: 0.0    # IMU-Yaw wenn Roboter perfekt nach Osten ausgerichtet (BNO055 kalibriert)
+
+# Waypoints: (x, y) in Metern, theta = Ankunfts-Heading in Grad
+waypoints:
+  - {id: 1,  x: 0.00,  y:  0.00, theta:   0}
+  - {id: 2,  x: 2.61,  y:  0.00, theta:   0}
+  - {id: 3,  x: 2.22,  y: -0.96, theta: 180}
+  - {id: 4,  x: 1.85,  y: -0.96, theta: 180}
+  - {id: 5,  x: 1.85,  y: -0.23, theta:  90}
+  - {id: 6,  x: 1.39,  y: -0.23, theta: 180}
+  - {id: 7,  x: 1.24,  y: -1.01, theta: 180}
+  - {id: 8,  x: 0.02,  y: -1.01, theta: 180}
+  - {id: 9,  x: 0.58,  y: -1.01, theta:   0}
+  - {id: 10, x: 0.58,  y: -0.36, theta:  90}
+  - {id: 11, x: 0.11,  y: -0.36, theta: 180}
+
+# Wandsegmente: Liste von (x1,y1) -> (x2,y2) in Metern
+# Abgeleitet aus Lidar-Referenzscans an den 11 Waypoints
+walls:
+  - {x1: -0.170, y1:  0.270, x2:  3.010, y2:  0.270}  # obere_wand (durchgehend)
+  - {x1: -0.140, y1: -1.280, x2:  4.650, y2: -1.280}  # untere_wand (durchgehend)
+  - {x1:  1.390, y1: -0.230, x2:  2.200, y2: -0.230}  # mittelwand_horizontal
+  - {x1: -0.140, y1: -1.280, x2: -0.140, y2:  0.270}  # linke_abschlusswand
+  - {x1:  1.620, y1: -1.280, x2:  1.620, y2: -0.960}  # trenner_unten
+  - {x1:  2.170, y1: -0.230, x2:  2.170, y2:  0.270}  # rechts_korridor_oben
+  - {x1:  3.000, y1: -0.230, x2:  3.000, y2:  0.270}  # vordere_wand
+  - {x1:  4.650, y1: -1.280, x2:  4.650, y2: -0.960}  # hintere_wand_rechts
